@@ -1,0 +1,30 @@
+cycles.php
+
+<?php
+if (isset($_SESSION['role']) && in_array($_SESSION['role'], ['coach', 'admin'])) {
+    mkForm("controleur.php", "get");
+    echo '<input type="hidden" name="action" value="creerCycle" />';
+    mkInput("text", "nom", "", array("label" => "Nom du cycle :", "id" => "cycleNom", "positionLabel" => "avant"));
+    br();
+    mkInput("text", "description", "", array("label" => "Description :", "id" => "cycleDesc", "positionLabel" => "avant"));
+    br();
+    mkInput("number", "repetitions", "", array("label" => "Répétitions :", "id" => "cycleReps", "positionLabel" => "avant"));
+    br();
+    mkInput("number", "reposEntreCycles", "", array("label" => "Repos entre cycles (s) :", "id" => "cycleReposC", "positionLabel" => "avant"));
+    br();
+    mkInput("number", "reposEntreExercices", "", array("label" => "Repos entre exercices (s) :", "id" => "cycleReposE", "positionLabel" => "avant"));
+    br();
+    mkInput("submit", "go", "Créer le cycle");
+    endForm();
+}
+if (isset($listeCycles) && is_iterable($listeCycles)) {
+    foreach ($listeCycles as $cycle) {
+        echo "<div>";
+        mkLien("index.php", htmlspecialchars($cycle['nom']), "view=deroule&id=" . $cycle['id']);
+        echo " - " . htmlspecialchars($cycle['description']);
+        echo "</div>";
+    }
+} else {
+    echo "<div>Aucun cycle à afficher.</div>";
+}
+?>
