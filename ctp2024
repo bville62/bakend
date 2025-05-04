@@ -115,3 +115,24 @@ $listeCycles = listerCycles();
                  $qs = array("view" => "cycle",
                             "msg" => "Champs manquants");
                  }
+
+
+dans modele php créer la fonction isCoach 
+// Administration
+if(isCoach(valider("idUser","SESSION"))){
+    echo "Nous sommes coach !<br>";
+    echo "Vu administrateur !<br>";
+    mkForm("controleur.php");
+
+    mkInput("text","nom","","placeholder='Nom'");
+    mkInput("text","description","","placeholder='Description'");
+    // mkInput("hidden","idUser");
+    mkInput("number","repetitions","","placeholder='Répétitions'");
+    mkInput("number","reposCycle","","placeholder='Repos entre cycle'");
+    mkInput("number","reposExo","","placeholder='Repos entre exos'");
+
+    mkInput("submit","action","AjouterCycle");
+
+    endForm();
+    echo "<br><br>";
+}
