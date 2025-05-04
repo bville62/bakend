@@ -1,5 +1,6 @@
 cycles.php
 
+
 <?php
 if (isset($_SESSION['role']) && in_array($_SESSION['role'], ['coach', 'admin'])) {
     mkForm("controleur.php", "get");
@@ -27,4 +28,71 @@ if (isset($listeCycles) && is_iterable($listeCycles)) {
 } else {
     echo "<div>Aucun cycle à afficher.</div>";
 }
+?>
+
+ array(4) { ["pseudo"]=> string(3) "max" ["idUser"]=> int(2) ["connecte"]=> bool(true) ["heureConnexion"]=> string(8) "12:49:02" } 
+
+
+
+
+
+controleur.php : 
+case "creerCycle": if (isset($_SESSION['id']) && in_array($_SESSION ['coach'],['admin'])) { 
+				$nom = valider("nom");
+				$description = valider("description"); 
+				$repetitions = intval(valider("repetitions")); 
+				$reposEntreCycles = intval(valider("reposEntreCycles"));
+				$reposEntreExercices = intval(valider("reposEntreExercices"));
+				$idCoach = $_SESSION['id'];
+					if ($nom && $description && $repetitions && $idCoach !== null) {
+					 	creerCycle($nom, $description, $idCoach, $repetitions, $reposEntreCycles, $reposEntreExercices);
+					  	$qs = array("view" => "cycles", "msg" => "Cycle créé !");
+					} else { 
+						$qs = array("view" => "cycles", "msg" => "Erreur : champs manquants.");
+				    } 
+				} 
+				break; 
+
+
+
+modele.php :
+function creerCycle($nom, $description, $idCoach, $repetitions, $reposEntreCycles, $reposEntreExercices) { 
+
+    $sql = "INSERT INTO Cycles (nom, description, idCoach, repetitions, reposEntreCycles, reposEntreExercices) 
+
+            VALUES ('" . addslashes($nom) . "', '" . addslashes($description) . "', $idCoach, $repetitions, $reposEntreCycles, $reposEntreExercices)"; 
+
+    SQLInsert($sql); 
+
+} 
+
+
+cycles.php :
+<?php 
+var_dump($_SESSION);
+if (isset($_SESSION['role']) && in_array($_SESSION['role'], ['coach'], ['admin'])) {
+    mkForm("controleur.php", "get");
+    echo '<input type="hidden" name="action" value="creerCycle" />';
+    mkInput("text", "nom", "", array("label" => "Nom du cycle :", "id" => "cycleNom", "positionLabel" => "avant"));
+    br();
+    mkInput("text", "description", "", array("label" => "Description :", "id" => "cycleDesc", "positionLabel" => "avant"));
+    br();
+    mkInput("number", "repetitions", "", array("label" => "Répétitions :", "id" => "cycleReps", "positionLabel" => "avant"));
+    br();
+    mkInput("number", "reposEntreCycles", "", array("label" => "Repos entre cycles (s) :", "id" => "cycleReposC", "positionLabel" => "avant"));
+    br();
+    mkInput("number", "reposEntreExercices", "", array("label" => "Repos entre exercices (s) :", "id" => "cycleReposE", "positionLabel" => "avant"));
+    br();
+    mkInput("submit", "go", "Créer le cycle");
+    endForm();
+}   
+$listeCycles = listerCycles();
+
+ foreach ($listeCycles as $cycle) { 
+        echo '<div>'; 
+        mklien("./index.php",htmlspecialchars($cycle['nom']),"view=deroule&id=$cycle[id]");
+        echo " - " . htmlspecialchars($cycle["description"]);
+        echo '</div>'; 
+
+    } 
 ?>
