@@ -96,3 +96,22 @@ $listeCycles = listerCycles();
 
     } 
 ?>
+
+
+
+ case 'Créer le Cycle' :
+                if(($nomCycle = valider("cycleName","GET"))
+                 &&( $desCycle = valider("cycleDesc","GET")) 
+                 && ($nbCycle = valider("nbCycle","GET"))
+                 && ($reposExo = valider("reposExo","GET"))
+                 && ($reposCycle = valider("reposCycle","GET"))
+                 && ($id = valider("idUser","SESSION")))
+                 {
+                    $idCycle = SQLGetChamp("SELECT MAX(id) FROM Cycles") + 1;
+                    SQLInsert("INSERT INTO Cycles VALUES($idCycle,'$nomCycle','$desCycle',$id,$nbCycle,$reposCycle,$reposExo);");
+                    $qs = array("view" => "cycle",
+                            "msg" => "Le Cycle $nomCycle est disponible");
+                 }else{
+                 $qs = array("view" => "cycle",
+                            "msg" => "Champs manquants");
+                 }
