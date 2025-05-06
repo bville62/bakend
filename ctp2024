@@ -36,6 +36,62 @@ if (isset($listeCycles) && is_iterable($listeCycles)) {
 
 
 
+
+
+
+
+
+$infoCycle = infoCycle(valider("id"));
+tprint($infoCycle);
+
+// Modification Cycle
+mkForm("controleur.php");
+
+mkInput("text","nom",$infoCycle["nom"],"placeholder='Nom'");
+mkInput("text","desc",$infoCycle["description"],"placeholder='Description'");
+
+
+mkInput("number","repCycle",$infoCycle["repetitions"],"placeholder='Nombre de répétitions'");
+mkInput("number","reposExo",$infoCycle["reposEntreExercices"],"placeholder='Repos entre exos'");
+mkInput("number","reposCycle",$infoCycle["reposEntreCycles"],"placeholder='Repos entre cycle'");
+mkInput("hidden","id",valider("id")); // Sert à prendre l'id du cycle 
+
+
+mkInput("submit","action","ModifierCycle");
+
+
+endForm();
+ dans édition
+[22:02]
+function modifierCycle($nom, $description, $repetitions, $reposCycle, $reposExo, $idCycle){
+
+    $SQL = "UPDATE Cycles SET nom = '$nom', description = '$description', repetitions = '$repetitions', 
+    reposEntreExercices = '$reposExo', reposEntreCycles = '$reposCycle' WHERE id = '$idCycle'";
+
+    SQLUpdate($SQL);
+
+}
+ Modèle
+[22:02]
+case 'ModifierCycle' :
+                $qs = array("view" => "cycle");
+                $user = valider("idUser","SESSION");
+                if ($idCycle = valider("id"))
+                if ($nom = valider("nom")) 
+                if ($description = valider("desc"))
+                if ($repetitions = valider("repCycle"))
+                if ($reposCycle = valider("reposCycle"))
+                if ($reposExo = valider("reposExo"))
+                if (valider("connecte","SESSION")) 
+                if (isCoach($user)){
+                    modifierCycle($nom, $description, $repetitions, $reposCycle, $reposExo, $idCycle);
+                }
+
+            break;
+Contrôleur
+
+
+
 controleur.php : 
 case "creerCycle": if (isset($_SESSION['id']) && in_array($_SESSION ['coach'],['admin'])) { 
 				$nom = valider("nom");
