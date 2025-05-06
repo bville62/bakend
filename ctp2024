@@ -36,7 +36,19 @@ if (isset($listeCycles) && is_iterable($listeCycles)) {
 
 
 
+// pour la q8 : 
 
+ case 'AjouterExercice' :
+                $qs = array("view" => "creation");
+                $user = valider("idUser","SESSION");
+                if ($nom = valider("nom")) 
+                if ($description = valider("description"))
+                if (valider("connecte","SESSION")) 
+                if (isCoach($user)){
+                    ajouterExercice($nom, $description, $user);
+                }
+
+            break;
 
 
 
