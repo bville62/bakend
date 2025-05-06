@@ -1,3 +1,25 @@
+
+dans le index.php
+
+case "edition" :
+    if (!valider("connecte", "SESSION") || !isCoach(valider("idUser","SESSION"))) {
+        die("Accès interdit");
+    }
+    
+    $idCycle = (int)valider("id");
+    $cycle = getCycle($idCycle);
+    
+    // Vérification propriétaire
+    if ($cycle && $cycle['idCoach'] == valider("idUser","SESSION")) {
+        $exercices = listerExercices(); // Pour menu déroulant
+        $composition = getCompositionCycle($idCycle);
+        include("templates/edition.php");
+    } else {
+        die("Droits insuffisants ou cycle inexistant");
+    }
+break;
+
+
 cycles.php
 
 
