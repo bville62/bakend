@@ -1,4 +1,6 @@
+[Uploading fiche-revision-csi-complete.md…]()
 # FICHE DE RÉVISION ULTIME – CSI (LE2)
+## Version enrichie avec schémas et diagrammes
 
 ## Objectif
 Maîtriser tout ce qui tombe au partiel de **Conception des Systèmes d'Information (CSI)** à partir du cours et des anciens sujets (2021–2022, 2022–2023, 2023–2024, 2024–2025).
@@ -9,7 +11,7 @@ Maîtriser tout ce qui tombe au partiel de **Conception des Systèmes d'Informat
 1. [Système d'information et contexte du cours](#1-système-dinformation-et-contexte-du-cours)
 2. [Hiérarchie d'abstraction (MCD / MLD / MPD)](#2-hiérarchie-dabstraction-très-fréquent)
 3. [Modèle entité–association (MEA)](#3-modèle-entité--association-mea)
-4. [Traduction MEA → Modèle relationnel](#4-traduction-mea--modèle-relationnel)
+4. [Traduction MEA → Modèle relationnel](#4-traduction-mea--modèle-relationnel) ⭐ **AVEC SCHÉMAS**
 5. [Lecture, critique et correction d'un MEA](#5-lecture-critique-et-correction-dun-mea)
 6. [UML (introduction)](#6-uml--ce-quil-faut-savoir-pour-le-partiel)
 7. [Vocabulaire et acronymes](#7-vocabulaire-acronymes-et-questions-de-cours-classiques)
@@ -37,16 +39,23 @@ qui permet de **collecter, stocker, traiter et mettre à disposition de l'inform
 ### 1.2. Système d'information vs système informatique
 
 **Composants typiques d'un SI (à connaître) :**
-- Acteurs
-- Processus
-- Informations
-- Données
-- Bases de données
-- Matériels
-- Applications
-
-**Le système informatique** =
-- **Matériels + Bases de données + Applications**
+```
+┌─────────────────────────────────────┐
+│      SYSTÈME D'INFORMATION          │
+├─────────────────────────────────────┤
+│  • Acteurs                          │
+│  • Processus                        │
+│  • Informations & Données           │
+│  ┌─────────────────────────────┐    │
+│  │ SYSTÈME INFORMATIQUE        │    │
+│  ├─────────────────────────────┤    │
+│  │ • Matériels                 │    │
+│  │ • Bases de données          │    │
+│  │ • Applications              │    │
+│  └─────────────────────────────┘    │
+│  • Organisation, Méthodes           │
+└─────────────────────────────────────┘
+```
 
 **Donc :**
 - **SI** = plus large (inclut organisation, processus, acteurs, etc.)
@@ -59,9 +68,12 @@ qui permet de **collecter, stocker, traiter et mettre à disposition de l'inform
 | **Donnée** | Valeur brute, non interprétée | 18, "LE2", "2025-12-06", "IG2I-SS05" |
 | **Information** | Donnée interprétée dans un contexte, qui a du sens | "Température = 18 °C dans la salle IG2I-SS05 ce matin" |
 
-À l'examen, on attend :
-- Une phrase claire : **l'information est une donnée interprétée**
-- Éventuellement un exemple (non obligatoire)
+```
+DONNÉES BRUTES  →  [INTERPRÉTATION CONTEXTUELLE]  →  INFORMATION
+   "18"                 (température, salle IG2I)      "18°C dans IG2I"
+   "2025-12-06"        (date d'aujourd'hui)           "Partiel CSI ce jour"
+   "LE2"               (promotion IG2I)                "Je suis en LE2 à IG2I"
+```
 
 ---
 
@@ -75,11 +87,50 @@ qui permet de **collecter, stocker, traiter et mettre à disposition de l'inform
 | **Logique** | **MLD** (Modèle Logique de Données) | **Modèle relationnel** dans ce cours (tables, colonnes, PK, FK…). Dépend du type de base de données. |
 | **Physique** | **MPD** (Modèle Physique de Données) | Définition SQL, types concrets, index, contraintes physiques. Dépend du SGBD choisi. |
 
-### 2.2. À retenir par cœur
+### 2.2. Schéma de la hiérarchie d'abstraction
+
+```
+NIVEAU CONCEPTUEL (MCD/MEA)
+┌────────────────────────────────────┐
+│  Élève       Promotion              │
+│  -------     ----------             │
+│  • numéro    • code                 │
+│  • nom       • année                │
+│  • prénom    • établissement        │
+│              • apprentissage        │
+│       ↓ Appartient à (1,1 — 0,n)    │
+└────────────────────────────────────┘
+         ↓ TRADUCTION
+         
+NIVEAU LOGIQUE (MLD/MODÈLE RELATIONNEL)
+┌────────────────────────────────────┐
+│  ELEVE(numPK, nom, prénom, promoId FK)        │
+│  PROMOTION(codePK, année, établissement, apprentissage) │
+└────────────────────────────────────┘
+         ↓ IMPLÉMENTATION
+         
+NIVEAU PHYSIQUE (MPD/SQL)
+┌────────────────────────────────────┐
+│  CREATE TABLE ELEVE(               │
+│    num INT PRIMARY KEY,            │
+│    nom VARCHAR(255) NOT NULL,      │
+│    prénom VARCHAR(255),            │
+│    promoId VARCHAR(10) FOREIGN KEY │
+│  );                                │
+│  CREATE TABLE PROMOTION(           │
+│    code VARCHAR(10) PRIMARY KEY,   │
+│    année INT,                      │
+│    établissement VARCHAR(255),     │
+│    apprentissage BOOLEAN           │
+│  );                                │
+└────────────────────────────────────┘
+```
+
+### 2.3. À retenir par cœur
 
 ✅ **Ordre du plus abstrait au plus concret :**
 ```
-Conceptuel (MCD/MEA) → Logique (MLD/MR) → Physique (MPD/SQL)
+CONCEPTUEL (MCD/MEA) → LOGIQUE (MLD/MR) → PHYSIQUE (MPD/SQL)
 ```
 
 ✅ **Noms des modèles** à chaque niveau (MCD / MLD / MPD)
@@ -94,281 +145,778 @@ C'est le **cœur du partiel** :
 - Gros exercice de modélisation à partir d'un énoncé (drones, vols, salles, NextCloud, etc.)
 - Exercice de compréhension et de critique d'un modèle existant
 
-### 3.1. Concepts de base
+### 3.1. Concepts de base avec schémas
 
 #### Entité
-- **Ensemble d'objets de même nature** (concrets ou abstraits)
-- **Exemples :** Client, Produit, Course, Saison, Équipe, Salle, Bâtiment, Vol, Aéroport
-- **Notation :** rectangle, **nom au singulier, majuscule initiale**
+```
+┌──────────────────┐
+│     ÉLÈVE        │  ← Nom de l'entité (singulier, majuscule)
+├──────────────────┤
+│ Attributs:       │
+│ • numéro (PK)    │  ← Identifiant (souligné)
+│ • nom            │
+│ • prénom         │
+│ • dateNaissance  │
+│ • email          │
+└──────────────────┘
+```
 
 #### Attribut
-- **Donnée unitaire** propre à une entité ou une association
-- **Exemples :** nom, prénom, date de naissance, code, durée, prix, langue, email
-- **Nom :** plutôt en minuscules ; en Merise accents/espaces tolérés, mais style proche UML : éviter accents et espaces
+```
+Attributs atomiques (simples)      Attributs NON atomiques (composés)
+────────────────────────────       ──────────────────────────────────
+• nom ✅                           • adresseCOMPLETE (rue + CP + ville) ❌
+• prénom ✅                        • listeSponsors (liste) ❌
+• email ✅                         • coordonnées (lat + long) ❌
+• dateNaissance ✅                 • dateHeureArrivée (date + heure) ❌
+```
 
-#### Identifiant
-- **Attribut** (ou groupe d'attributs) qui identifie **univoquement** une occurrence d'entité
-- Souvent **souligné** dans le MEA
+#### Identifiant (clé)
+```
+CAS 1 – Clé neutre simple (RECOMMANDÉ)
+┌─────────────────────┐
+│  PROMOTION          │
+├─────────────────────┤
+│ • idPromo (PK) ← Clé neutre │
+│ • code (métier)     │
+│ • année             │
+│ • établissement     │
+└─────────────────────┘
 
-**Deux types :**
-- **Clé métier :** a un sens dans le métier (ex : numéro de sécurité sociale, matricule, code salle)
-- **Clé neutre :** créée uniquement pour la modélisation (id auto-incrémenté, numéro interne)
+CAS 2 – Clé métier simple
+┌─────────────────────┐
+│  PROMOTION          │
+├─────────────────────┤
+│ • code (PK) ← Clé métier unique │
+│ • année             │
+│ • établissement     │
+└─────────────────────┘
 
-**Bonne pratique :**
-- Utiliser une **clé neutre simple** comme identifiant (un seul attribut)
-- Garder la clé métier comme simple attribut (ex : code, numéro officiel)
+CAS 3 – Clé composée (multi-attribut) ⚠️
+┌─────────────────────────────────────┐
+│  RESULTAT (examen)                  │
+├─────────────────────────────────────┤
+│ • idElève (PK1)     │
+│ • idCours (PK1)     │ ← Clé composée (2 attributs)
+│ • note              │
+│ • date              │
+└─────────────────────────────────────┘
+```
 
-#### Association
-- **Lien d'une certaine nature** entre entités
-- **Exemples :**
-  - "Appartient à" entre Élève et Promotion
-  - "Passe commande à" entre Client et Fournisseur
-  - "Est affecté à" entre Enseignant et Bureau
-- **Peut avoir ses propres attributs** (ex : date, quantité, statut, note)
+#### Association avec multiplicités
 
-⚠️ **Important :** Une association relie des **entités**, PAS des **attributs**
+```
+EXEMPLE 1 – Association (1,1) — (0,n)
+┌──────────────┐ 1,1      0,n ┌────────────────┐
+│  ÉLÈVE       │◄──────────────│   PROMOTION    │
+└──────────────┘ Appartient à  └────────────────┘
 
-#### Multiplicités (cardinalités)
-Sur chaque arc entre une entité et une association : **(min, max)**
+Lecture côté Élève:    Un élève appartient à UNE ET UNE SEULE promotion
+Lecture côté Promotion: Une promotion peut contenir AUCUN, UN OU PLUSIEURS élèves
 
-**Valeurs usuelles :**
-- `0,1` : au plus un (zéro ou un)
-- `1,1` ou `1` : exactement un
-- `0,n` ou `0,*` : zéro, un ou plusieurs
-- `1,n` : au moins un (un ou plusieurs)
-- `X,Y` : entre X et Y inclus (rare)
 
-**Lecture dans les deux sens (TRÈS IMPORTANT) :**
+EXEMPLE 2 – Association (0,1) — (0,n)
+┌──────────────┐ 0,1      0,n ┌────────────────┐
+│  ENSEIGNANT  │◄──────────────│   BUREAU       │
+└──────────────┘ Est affecté à └────────────────┘
 
-Exemple : Élève —(Appartient à)— Promotion, avec multiplicités `1,1` côté Élève et `0,n` côté Promotion
-- **Côté Élève :** "Un élève appartient à **une et une seule** promotion"
-- **Côté Promotion :** "Une promotion peut contenir **zéro, un ou plusieurs** élèves"
+Lecture côté Enseignant: Un enseignant peut être affecté à AU PLUS UN bureau
+Lecture côté Bureau:     Un bureau peut contenir AUCUN OU PLUSIEURS enseignants
 
-#### Instance (ou occurrence)
-- **Instance d'entité :** un objet concret avec des valeurs d'attributs
-  - Ex : `dupont : Élève (nom = "Dupont", prénom = "Martine", âge = 19, …)`
-- **Instance d'association :** un lien concret entre instances d'entités
-  - Ex : `(dupont, promo_LE1)` pour l'association "Appartient à"
 
----
+EXEMPLE 3 – Association (0,n) — (0,n)
+┌──────────────┐ 0,n      0,n ┌────────────────┐
+│  CLIENT      │◄──────────────│   PRODUIT      │
+└──────────────┘ Achète        └────────────────┘
+
+Lecture côté Client:  Un client peut acheter AUCUN, UN OU PLUSIEURS produits
+Lecture côté Produit: Un produit peut être acheté par AUCUN, UN OU PLUSIEURS clients
+```
+
+#### Instance (occurrence)
+
+```
+ENTITÉ Élève
+┌──────────────────┐
+│     ÉLÈVE        │
+├──────────────────┤
+│ • numéro
+│ • nom
+│ • prénom
+│ • dateNaissance
+│ • email
+└──────────────────┘
+
+        ↓ INSTANCIATION
+
+INSTANCES d'Élève
+┌──────────────────────────────────────┐
+│ dupont : ÉLÈVE                       │
+├──────────────────────────────────────┤
+│ • numéro = 12345                     │
+│ • nom = "Dupont"                     │
+│ • prénom = "Martine"                 │
+│ • dateNaissance = "1995-05-15"       │
+│ • email = "m.dupont@centrale.fr"     │
+└──────────────────────────────────────┘
+
+┌──────────────────────────────────────┐
+│ martin : ÉLÈVE                       │
+├──────────────────────────────────────┤
+│ • numéro = 12346                     │
+│ • nom = "Martin"                     │
+│ • prénom = "Jean"                    │
+│ • dateNaissance = "1995-08-22"       │
+│ • email = "j.martin@centrale.fr"     │
+└──────────────────────────────────────┘
+```
 
 ### 3.2. Règles importantes et pièges classiques
 
 #### Règle 1 – Pas de références à d'autres entités dans les attributs
-- ❌ **Interdit :** un attribut "promotion de l'élève" dans l'entité Élève
-- ✅ **Correct :** une **association** "Appartient à" entre Élève et Promotion
 
-#### Règle 2 – Pas de collections (liste, tableau…) comme attribut
-- ❌ **Interdit :** "liste des vidéos postées" dans l'entité Utilisateur
-- ✅ **Correct :** **association** "Poste" entre Utilisateur et Vidéo
-- ❌ **Interdit :** "liste des sponsors" dans Équipe → très suspect (souvent demandé aux examens)
+```
+❌ MAUVAIS (anti-pattern)
+┌──────────────────┐
+│     ÉLÈVE        │
+├──────────────────┤
+│ • numéro (PK)    │
+│ • nom            │
+│ • prénom         │
+│ • promotion ← RÉFÉRENCE À UNE AUTRE ENTITÉ ! │
+└──────────────────┘
+
+✅ CORRECT (avec association)
+┌──────────────────┐       1,1        0,n ┌────────────────┐
+│     ÉLÈVE        │◄──────────────────────│  PROMOTION     │
+├──────────────────┤ Appartient à      ├────────────────┤
+│ • numéro (PK)    │                       │ • code (PK)    │
+│ • nom            │                       │ • année        │
+│ • prénom         │                       │ • établissement│
+└──────────────────┘                       └────────────────┘
+```
+
+#### Règle 2 – Pas de collections comme attribut
+
+```
+❌ MAUVAIS
+┌──────────────┐
+│  ÉQUIPE      │
+├──────────────┤
+│ • id (PK)    │
+│ • couleur    │
+│ • sponsors ← LISTE/COLLECTION ! │
+└──────────────┘
+
+✅ CORRECT (avec entité Sponsor)
+┌──────────────┐        0,n      1,n ┌──────────────┐
+│  ÉQUIPE      │◄────────────────────│  SPONSOR     │
+├──────────────┤ Sponsorisée par ├──────────────┤
+│ • id (PK)    │                      │ • id (PK)    │
+│ • couleur    │                      │ • nom        │
+│ • budget     │                      │ • secteur    │
+└──────────────┘                      └──────────────┘
+```
 
 #### Règle 3 – Unicité d'une instance d'association
-Pour une association donnée, entre deux mêmes occurrences d'entités, il ne peut y avoir qu'une seule occurrence d'association.
 
-**Si on a besoin de plusieurs liens différents :** on **réifie** l'association
-- Exemple : au lieu de "Passe commande à" (Client, Fournisseur, date)
-- Créer une entité **Commande** et des associations autour
+```
+⚠️ PROBLÈME : Multiplicités n,n sans attributs d'association
+┌──────────────┐ 0,n        0,n ┌──────────────┐
+│  CLIENT      │◄────────────────│ FOURNISSEUR  │
+├──────────────┤ Passe commande ├──────────────┤
+│ • id (PK)    │                 │ • id (PK)    │
+│ • nom        │                 │ • code       │
+└──────────────┘                 └──────────────┘
+
+PROBLÈME: Un même client peut commander plusieurs fois
+au même fournisseur, mais on veut garder trace de chaque commande
+avec une date !
+
+✅ SOLUTION : Réification (créer une entité COMMANDE)
+┌──────────────┐ 1,n        1,1 ┌──────────────┐
+│  CLIENT      │───────────────►│  COMMANDE    │
+├──────────────┤ Passe      ├──────────────┤
+│ • id (PK)    │            │ • id (PK)    │
+│ • nom        │            │ • date       │
+└──────────────┘ 1,1        1,n └──────────────┘
+                  ◄───────────────│
+                 Reçue par        │
+                        ┌──────────────┐
+                        │ FOURNISSEUR  │
+                        ├──────────────┤
+                        │ • id (PK)    │
+                        │ • code       │
+                        └──────────────┘
+```
 
 #### Règle 4 – Attributs atomiques
-Un attribut doit contenir **une seule information**.
 
-**Exemples d'attributs NON atomiques :**
-- "adresse complète" si on a besoin de séparer rue, code postal, ville
-- "listeSponsors" (liste = problème)
-- "coordonnées" si on doit distinguer latitude et longitude
+```
+NON ATOMIQUES                          CORRIGES EN ATTRIBUTS ATOMIQUES
+────────────────────────────────       ────────────────────────────────
+adresseComplète                        → rue, codePostal, ville, pays
+                                       → ou entité ADRESSE séparée
 
-**Correction :**
-- Découper en plusieurs attributs, OU
-- Créer une nouvelle entité si c'est une liste
+coordonnées (lat/long)                 → latitude, longitude
+
+dateHeureArrivée (date ET heure)       → dateArrivée, heureArrivée
+
+listeSponsors (collection)             → entité SPONSOR
+                                       + association SPONSORISE
+
+nomPrenomSociete (3 infos)             → nom, prenom, nomSociete
+```
 
 #### Règle 5 – Éviter les redondances
-**Exemple typique dans les sujets :**
-- Attribut "total" d'une vente, alors qu'on peut le **recalculer** à partir des lignes de vente et prix unitaire
 
-**À retenir :** Si la donnée peut être recalculée facilement à partir d'autres données stockées, il vaut mieux **ne pas la stocker** (sauf si l'énoncé demande explicitement de conserver ce résumé).
+```
+❌ MAUVAIS (redondance)
+┌──────────────────┐            ┌──────────────────┐
+│  VENTE           │            │  LIGNE_VENTE     │
+├──────────────────┤ 1,1    0,n ├──────────────────┤
+│ • id (PK)        │◄───────────│ • id (PK)        │
+│ • dateVente      │ Concerne   │ • idVente (FK)   │
+│ • total ← PEUT SE│            │ • idProduit (FK) │
+│   RECALCULER !   │            │ • quantité       │
+│ • montantTVA     │            │ • prixUnitaire   │
+└──────────────────┘            │ • montantLigne   │
+                                └──────────────────┘
+
+✅ CORRECT (pas de redondance)
+Total = somme de tous les montantLigne
+MontantTVA = total * taux (si besoin, le calculer)
+
+Si VRAIMENT on veut garder 'total' pour performance:
+→ L'énoncé DOIT le demander explicitement
+→ Et il faut justifier qu'on le met à jour après chaque vente
+```
 
 #### Règle 6 – Identifiants bien choisis
-L'examen demande parfois : *"L'un des identifiants du modèle est mal choisi. Lequel ? Comment corriger ?"*
 
-**À vérifier :**
-- **Unicité réelle** (la valeur doit bien identifier un objet unique)
-- **Stabilité** (éviter les valeurs qui changent souvent, ex : email)
-- **Minimalité** (éviter un identifiant multi-attribut alors qu'une clé neutre simple serait mieux)
-
----
+```
+MAUVAIS IDENTIFIANT             BON IDENTIFIANT
+─────────────────────           ───────────────
+email (change !)                idUtilisateur (PK)
+telephone (change !)            email (attribut simple)
+(nom, prenom) multi-attrib      Et garder (nom, prenom) comme clé métier
+numéro auto-incr instable       code métier stable
+```
 
 ### 3.3. Associations particulières
 
 #### Association réflexive
-Association entre une entité et elle-même (mais pas la même occurrence)
 
-**Exemples :**
-- Élève "Est mentor de" Élève
-- Personne "Est père de" Personne
+```
+EXEMPLE : Élève mentor d'un autre Élève
 
-⚠️ **On doit préciser des rôles :** mentor / mentoré, père / enfant, etc.
+┌──────────────────┐
+│    ÉLÈVE         │
+├──────────────────┤
+│ • numéro (PK)    │
+│ • nom            │
+│ • prénom         │
+└──────────────────┘
+        ▲  ↓
+        │  │
+        └──┘
+       0,1 (menteur) ← rôles obligatoires !
+       0,n (mentoré)
 
-**Cas typique de question de cours :** *"Qu'est-ce qu'une association réflexive ?"*
+Est mentor de
+
+Lecture :
+- Un élève peut mentorer AUCUN OU PLUSIEURS autres élèves
+- Un élève peut être mentoré par AU PLUS UN élève
+```
 
 #### Association n-aire (n > 2)
-Lien entre plus de deux entités
 
-**Exemple :** Cours–Salle–Promotion pour "A lieu dans"
+```
+EXEMPLE : Cours a lieu dans une Salle pour une Promotion
 
-**Deux modélisations possibles :**
-1. Directement comme association n-aire
-2. Transformée (réifiée) en entité avec des associations binaires
+┌──────────────┐     ┌──────────────┐
+│  COURS       │     │  SALLE       │
+├──────────────┤     ├──────────────┤
+│ • id (PK)    │     │ • id (PK)    │
+│ • nom        │     │ • numéro     │
+│ • durée      │     │ • capacité   │
+└──────────────┘     └──────────────┘
+         ▲                    ▲
+         │                    │
+         └────────┬───────────┘
+                  │
+              A lieu dans
+           (association n-aire)
+                  │
+         ┌────────┴───────────┐
+         │                    ▼
+    ┌──────────────┐
+    │ PROMOTION    │
+    ├──────────────┤
+    │ • code (PK)  │
+    │ • année      │
+    └──────────────┘
 
-**Exercice classique :** une même situation modélisée avec une association n-aire ou avec une entité
-
-#### Héritage (généralisation / spécialisation)
-- Notion vue dans les diapos mais indiquée **"hors programme"** pour la traduction
-- **Idée :**
-  - Une entité mère (Personne)
-  - Des entités filles (Élève, Enseignant)
-  - Les filles héritent des attributs de la mère et de ses associations
-
-À connaître au moins en vocabulaire, car cela peut apparaître dans les questions de cours ou dans un MEA à commenter.
-
----
-
-### 3.4. Méthode pour construire un MEA à partir d'un énoncé
-
-1. **Lire l'énoncé** au moins 2–3 fois
-
-2. **Extraire les groupes nominaux** importants : candidats entités / attributs
-   - Ce qui semble "liste d'objets" → candidat entité
-   - Ce qui décrit une propriété d'un objet → candidat attribut
-
-3. **Identifier les actions / relations** (groupes verbaux) : candidats associations
-
-4. **Pour chaque entité candidate**, décider :
-   - Attributs pertinents
-   - Identifiant (clé neutre + éventuelle clé métier)
-
-5. **Pour chaque association :**
-   - Entités reliées
-   - Sens de lecture
-   - Multiplicités min/max en se posant les bonnes questions des deux côtés
-   - Attributs d'association si nécessaires (quantité, date, statut…)
-
-6. **Vérifier :**
-   - Pas de références à d'autres entités dans les attributs
-   - Pas de listes / collections en attribut
-   - Pas de redondances évidentes
-   - Les contraintes métier importantes de l'énoncé sont bien modélisées
-
-**Entraînement :**
-- Refaire les gros énoncés :
-  - Courses de drones
-  - Réservation de vols par agence de voyages
-  - Gestion des salles et du matériel
-  - Plateforme de partage de fichiers type NextCloud
+Contraintes :
+- Un cours a lieu dans EXACTEMENT UNE salle et UNE promotion
+- Une salle peut accueillir PLUSIEURS cours
+- Une promotion peut avoir PLUSIEURS cours
+```
 
 ---
 
 ## 4. TRADUCTION MEA → MODÈLE RELATIONNEL
 
+⭐ **C'EST LA PARTIE LA PLUS IMPORTANTE ET LA PLUS TESTÉE AU PARTIEL**
+
 ### 4.1. Principes généraux
 
-- Le modèle logique de données (MLD) prend la forme d'un **modèle relationnel**
-- Une **relation** = une **table**
-- On conserve les informations de structure : colonnes, types, **clés primaires (PK)** et **clés étrangères (FK)**
-
-**Règles de base :**
-- Chaque **entité** → une **table (relation)** avec au minimum ses attributs
-- L'**identifiant** de l'entité → **clé primaire (PK)** de la table
-- Les **associations** → donnent lieu à des **clés étrangères** ou à des **tables supplémentaires** selon les multiplicités
-
----
-
-### 4.2. Traduction des entités
-
-**Entité → relation** avec les mêmes attributs
-
-**Choix de la clé primaire (PK) :**
-- Souvent un attribut clé neutre (id)
-- Ou une clé métier si l'énoncé le justifie (ex : code unique stable)
-
-**Exemple simple :**
-
-Entité MEA
 ```
-Promotion
-  code (clé neutre)
-  anneeDiplomante
-  etablissement
-  apprentissage
+NIVEAU CONCEPTUEL (MEA)
+    ↓
+    └─ Chaque ENTITÉ → TABLE
+    └─ Chaque ASSOCIATION → dépend des multiplicités
+       ├─ (1,1)—(1,n) → FK dans table côté n
+       ├─ (1,1)—(1,1) → fusion OU FK
+       └─ (n,n) → NOUVELLE TABLE
+
+NIVEAU LOGIQUE (MODÈLE RELATIONNEL)
 ```
 
-Traduction en MR
+### 4.2. Traduction des entités - Schémas détaillés
+
+#### Schéma basique
+
 ```
-PROMOTION(code PK, anneeDiplomante, etablissement, apprentissage)
-```
+MEA - ENTITÉ
+┌────────────────────┐
+│   PROMOTION        │
+├────────────────────┤
+│ • code (PK)        │← Identifiant
+│ • anneeDiplomante  │
+│ • etablissement    │
+│ • apprentissage    │
+└────────────────────┘
 
----
+        ↓ TRADUCTION
 
-### 4.3. Traduction des associations binaires
-
-#### Cas 1 – (x,1) – (x,n)
-*Où 0,1 ou 1,1 d'un côté ; 0,n ou 1,n de l'autre*
-
-**Règle :** Placer une **clé étrangère (FK)** du côté **(n)** vers le côté **(1)**
-
-- **Sans attributs d'association :** juste une FK dans la table côté (n)
-- **Avec attributs d'association :** les attributs sont stockés dans la table côté (n) en même temps que la FK
-
-**Exemple :** "Un élève appartient à une et une seule promotion" / "Une promotion peut contenir plusieurs élèves"
-```
-ELEVE(idEleve PK, …, promoId FK → PROMOTION)
-PROMOTION(codePK, …)
-```
-
-#### Cas 2 – (x,1) – (x,1)
-*Où 0,1 ou 1,1 des deux côtés*
-
-**Deux possibilités :**
-1. **Fusion :** fusionner les deux entités en une seule table (si logique)
-2. **OU** placer une FK dans un sens ou dans l'autre
-
-#### Cas 3 – (x,n) – (x,n)
-*Où 0,n ou 1,n des deux côtés*
-
-**Règle :** Créer une **nouvelle table** pour l'association
-
-Cette table contient :
-- Une **FK** vers la première entité
-- Une **FK** vers la deuxième entité
-- Éventuels **attributs** de l'association
-- La **clé primaire** formée des deux FKs (PK composite) ou d'une clé neutre + ces FKs
-
-**Exemple typique :**
-
-Association "Participe à" entre Pilote et Course avec multiplicités (0,n) — (0,n)
-```
-PARTICIPATION(piloteId FK, courseId FK, …, PK(piloteId, courseId))
+MR - RELATION (TABLE)
+┌─────────────────────────────────────────────────┐
+│  PROMOTION                                      │
+├─────────────────────────────────────────────────┤
+│  code (PK)        VARCHAR(10)                   │
+│  anneeDiplomante  INT                          │
+│  etablissement    VARCHAR(255)                 │
+│  apprentissage    BOOLEAN                      │
+└─────────────────────────────────────────────────┘
 ```
 
-#### Cas 4 – Association n-aire (n > 2)
+### 4.3. Traduction des associations binaires - CAS PAR CAS
 
-**Règle :** Créer une **nouvelle table** représentant l'association
+#### CAS 1 – Association (x,1) — (x,n) ⭐ LE PLUS COURANT
 
-Cette table contient :
-- Une **FK** vers **chaque** entité participante
-- Les **attributs** de l'association
-- La **clé primaire** formée de la combinaison des FKs (ou clé neutre + FKs)
+```
+MEA
+┌──────────────┐ 1,1      0,n ┌────────────────┐
+│  ÉLÈVE       │◄──────────────│  PROMOTION     │
+├──────────────┤ Appartient à ├────────────────┤
+│ • numéro(PK) │                │ • code (PK)    │
+│ • nom        │                │ • année        │
+│ • prénom     │                │ • établissement│
+└──────────────┘                └────────────────┘
 
----
+RÈGLE : FK du côté (n) pointant vers (1)
 
-### 4.4. Points d'attention dans la traduction
+        ↓ TRADUCTION
 
-- Bien garder cohérence entre cardinalités et structure :
-  - Côté **(n)** → FK côté **(1)**
-  - **(n,n)** → table d'association
-- Ne pas oublier les **attributs d'association**
-- Choisir des **PK simples** et **stables**
-- Pour les associations complexes (avec contraintes métier fortes), bien réfléchir à l'**identifiant** de la table d'association
+MR - RELATIONS
+┌──────────────────────────────────────┐
+│  ÉLÈVE                               │
+├──────────────────────────────────────┤
+│  numéro (PK)         INT             │
+│  nom                 VARCHAR(255)    │
+│  prénom              VARCHAR(255)    │
+│  promoCode (FK→PROM) VARCHAR(10)     │← FK du côté (n)
+└──────────────────────────────────────┘
+
+┌────────────────────────────────────┐
+│  PROMOTION                         │
+├────────────────────────────────────┤
+│  code (PK)           VARCHAR(10)    │
+│  année               INT            │
+│  établissement       VARCHAR(255)   │
+└────────────────────────────────────┘
+
+INTERPRÉTATION:
+- Chaque élève DOIT avoir une promotion (1,1)
+- Chaque promotion peut avoir plusieurs élèves (0,n)
+- La FK "promoCode" dans ÉLÈVE force cette contrainte
+```
+
+#### CAS 1b – Avec attributs d'association
+
+```
+MEA (association WITH attributes)
+┌──────────────┐ 1,1      0,n ┌────────────────┐
+│  ÉLÈVE       │◄──────────────│  COURS         │
+├──────────────┤ S'inscrit à├────────────────┤
+│ • numéro(PK) │ • date        │ • id (PK)      │
+│ • nom        │ • note        │ • titre        │
+│ • prénom     │                │ • duree        │
+└──────────────┘                └────────────────┘
+
+RÈGLE : Les attributs de l'association vont côté (n)
+
+        ↓ TRADUCTION
+
+MR
+┌──────────────────────────────────────┐
+│  ÉLÈVE                               │
+├──────────────────────────────────────┤
+│  numéro (PK)         INT             │
+│  nom                 VARCHAR(255)    │
+│  prénom              VARCHAR(255)    │
+└──────────────────────────────────────┘
+
+┌────────────────────────────────────────┐
+│  COURS                                 │
+├────────────────────────────────────────┤
+│  id (PK)             INT               │
+│  titre               VARCHAR(255)      │
+│  duree               INT               │
+└────────────────────────────────────────┘
+
+┌────────────────────────────────────────┐
+│  INSCRIPTION                           │← NOUVELLE TABLE  │
+├────────────────────────────────────────┤
+│  eleveNum (FK→ELEVE)  INT              │
+│  coursId (FK→COURS)   INT              │
+│  date                 DATE             │← Attributs assoc
+│  note                 FLOAT            │← dans cette table
+└────────────────────────────────────────┘
+
+OÙ:
+PK(INSCRIPTION) = (eleveNum, coursId)
+```
+
+#### CAS 2 – Association (x,1) — (x,1)
+
+```
+MEA - OPTION 1 : FUSION
+┌──────────────────┐ 1,1      1,1 ┌────────────────┐
+│  PERSONNE        │◄──────────────│  PERMIS        │
+├──────────────────┤ Possède    ├────────────────┤
+│ • id (PK)        │                │ • numéro (PK)  │
+│ • nom            │                │ • dateExpire   │
+│ • prénom         │                │ • categorie    │
+│ • dateNaissance  │                └────────────────┘
+└──────────────────┘
+
+        ↓ TRADUCTION
+
+MR - FUSION EN UNE SEULE TABLE
+┌────────────────────────────────────────┐
+│  PERSONNE                              │
+├────────────────────────────────────────┤
+│  id (PK)              INT              │
+│  nom                  VARCHAR(255)     │
+│  prénom               VARCHAR(255)     │
+│  dateNaissance        DATE             │
+│  permisNum            VARCHAR(20)      │
+│  permisDateExpire     DATE             │
+│  permisCategorie      VARCHAR(10)      │
+└────────────────────────────────────────┘
+
+AVANTAGES: Une seule table, plus simple
+INCONVÉNIENTS: Redondance si une personne n'a pas de permis
+
+
+────────────────────────────────────────────────────────
+
+MEA - OPTION 2 : CLÉS ÉTRANGÈRES
+        ↓ TRADUCTION
+
+MR - DEUX TABLES + FK
+┌────────────────────────────────────────┐
+│  PERSONNE                              │
+├────────────────────────────────────────┤
+│  id (PK)              INT              │
+│  nom                  VARCHAR(255)     │
+│  prénom               VARCHAR(255)     │
+│  dateNaissance        DATE             │
+│  permisNum (FK)       VARCHAR(20)      │
+└────────────────────────────────────────┘
+
+┌────────────────────────────────────────┐
+│  PERMIS                                │
+├────────────────────────────────────────┤
+│  numéro (PK)          VARCHAR(20)      │
+│  dateExpire           DATE             │
+│  categorie            VARCHAR(10)      │
+└────────────────────────────────────────┘
+
+AVANTAGES: Plus de flexibilité, pas de redondance
+INCONVÉNIENTS: Deux tables à gérer
+```
+
+#### CAS 3 – Association (x,n) — (x,n) ⭐ TRÈS IMPORTANT
+
+```
+MEA - ASSOCIATION (n,n)
+┌──────────────┐ 0,n      0,n ┌────────────────┐
+│  CLIENT      │◄──────────────│  PRODUIT       │
+├──────────────┤ Achète    ├────────────────┤
+│ • id (PK)    │                │ • id (PK)      │
+│ • nom        │                │ • nom          │
+│ • email      │                │ • prix         │
+└──────────────┘                └────────────────┘
+
+RÈGLE : NOUVELLE TABLE d'association avec FKs des deux côtés
+
+        ↓ TRADUCTION
+
+MR - TROIS TABLES
+┌────────────────────────────────────────┐
+│  CLIENT                                │
+├────────────────────────────────────────┤
+│  id (PK)              INT              │
+│  nom                  VARCHAR(255)     │
+│  email                VARCHAR(255)     │
+└────────────────────────────────────────┘
+
+┌────────────────────────────────────────┐
+│  PRODUIT                               │
+├────────────────────────────────────────┤
+│  id (PK)              INT              │
+│  nom                  VARCHAR(255)     │
+│  prix                 FLOAT            │
+└────────────────────────────────────────┘
+
+┌────────────────────────────────────────┐
+│  ACHAT ← TABLE D'ASSOCIATION           │
+├────────────────────────────────────────┤
+│  clientId (FK→CLIENT)  INT             │
+│  produitId (FK→PRODUIT) INT            │
+│  quantité              INT             │
+│  dateAchat             DATE            │
+├────────────────────────────────────────┤
+│  PK(ACHAT) = (clientId, produitId)    │
+│  OU ajouter une clé neutre idAchat    │
+└────────────────────────────────────────┘
+
+INTERPRÉTATION:
+- Un CLIENT peut ACHETER plusieurs PRODUITS
+- Un PRODUIT peut être ACHETÉ par plusieurs CLIENTS
+- Table ACHAT représente chaque occurrence d'association
+```
+
+#### CAS 3b – Association (n,n) avec attributs
+
+```
+MEA
+┌──────────────┐ 0,n      0,n ┌────────────────┐
+│  ÉTUDIANT    │◄──────────────│  COURS         │
+├──────────────┤ S'inscrit   ├────────────────┤
+│ • id (PK)    │ • date        │ • id (PK)      │
+│ • nom        │ • note finale │ • nom          │
+│              │                │ • credits      │
+└──────────────┘                └────────────────┘
+
+        ↓ TRADUCTION
+
+MR
+┌────────────────────────────────────────┐
+│  ÉTUDIANT                              │
+├────────────────────────────────────────┤
+│  id (PK)              INT              │
+│  nom                  VARCHAR(255)     │
+└────────────────────────────────────────┘
+
+┌────────────────────────────────────────┐
+│  COURS                                 │
+├────────────────────────────────────────┤
+│  id (PK)              INT              │
+│  nom                  VARCHAR(255)     │
+│  credits              INT              │
+└────────────────────────────────────────┘
+
+┌────────────────────────────────────────┐
+│  INSCRIPTION ← ATTRIBUTS ICI            │
+├────────────────────────────────────────┤
+│  etudiantId (FK→ETUDIANT)  INT         │
+│  coursId (FK→COURS)        INT         │
+│  date                      DATE        │
+│  noteFinale                FLOAT       │
+├────────────────────────────────────────┤
+│  PK(INSCRIPTION) = (etudiantId, coursId) │
+└────────────────────────────────────────┘
+```
+
+#### CAS 4 – Association n-aire (n > 2)
+
+```
+MEA - ASSOCIATION 3-AIRE
+┌──────────────┐      ┌────────────────┐
+│  COURS       │      │  SALLE         │
+├──────────────┤      ├────────────────┤
+│ • id (PK)    │      │ • id (PK)      │
+│ • titre      │      │ • numéro       │
+│ • duree      │      │ • capacité     │
+└──────────────┘      └────────────────┘
+         ▲                      ▲
+         │                      │
+         └──────────┬───────────┘
+                    │
+               A lieu dans
+             (heure départ)
+                    │
+         ┌──────────┴──────────┐
+         │                     ▼
+         │            ┌────────────────┐
+         │            │  PROMOTION     │
+         │            ├────────────────┤
+         │            │ • code (PK)    │
+         │            │ • année        │
+         │            └────────────────┘
+         │
+         └─ Association à 3 entités
+
+        ↓ TRADUCTION
+
+MR - NOUVELLE TABLE AVEC 3 FKs
+┌───────────────────────────────────────────┐
+│  COURS                                    │
+├───────────────────────────────────────────┤
+│  id (PK)              INT                 │
+│  titre                VARCHAR(255)        │
+│  duree                INT                 │
+└───────────────────────────────────────────┘
+
+┌───────────────────────────────────────────┐
+│  SALLE                                    │
+├───────────────────────────────────────────┤
+│  id (PK)              INT                 │
+│  numéro               VARCHAR(20)         │
+│  capacité             INT                 │
+└───────────────────────────────────────────┘
+
+┌───────────────────────────────────────────┐
+│  PROMOTION                                │
+├───────────────────────────────────────────┤
+│  code (PK)            VARCHAR(10)         │
+│  année                INT                 │
+└───────────────────────────────────────────┘
+
+┌───────────────────────────────────────────┐
+│  SESSION ← TABLE POUR ASSOCIATION 3-AIRE  │
+├───────────────────────────────────────────┤
+│  coursId (FK→COURS)       INT             │
+│  salleId (FK→SALLE)       INT             │
+│  promoCode (FK→PROMOTION) VARCHAR(10)     │
+│  heureDepart              TIME            │
+├───────────────────────────────────────────┤
+│  PK(SESSION) = (coursId, salleId, promoCode) │
+└───────────────────────────────────────────┘
+```
+
+### 4.4. TABLEAU RÉCAPITULATIF DES RÈGLES DE TRADUCTION
+
+```
+┌─────────────────────────────────────┬──────────────────────────────────┐
+│  MEA - MULTIPLICITÉS                │  MR - STRUCTURE RÉSULTANTE       │
+├─────────────────────────────────────┼──────────────────────────────────┤
+│                                     │                                  │
+│  ENTITÉ A                           │  Table A: attributs A + clé PK   │
+│                                     │                                  │
+├─────────────────────────────────────┼──────────────────────────────────┤
+│                                     │                                  │
+│  (x,1)—(x,n)                        │  FK côté (n) → pointant (1)      │
+│  Assoc: attributs optionnels        │  Attrib. assoc. côté (n)         │
+│                                     │                                  │
+├─────────────────────────────────────┼──────────────────────────────────┤
+│                                     │                                  │
+│  (x,1)—(x,1)                        │  OU Fusion (1 table)             │
+│                                     │  OU FK dans un sens              │
+│                                     │                                  │
+├─────────────────────────────────────┼──────────────────────────────────┤
+│                                     │                                  │
+│  (x,n)—(x,n)                        │  Nouvelle table d'association    │
+│  Assoc: attributs (date, note...)  │  avec FKs des 2 côtés            │
+│                                     │  + attributs de l'assoc.         │
+│                                     │  PK = (FK1, FK2) ou clé neutre  │
+│                                     │                                  │
+├─────────────────────────────────────┼──────────────────────────────────┤
+│                                     │                                  │
+│  n-aire (n > 2)                     │  Nouvelle table avec FK vers     │
+│                                     │  CHAQUE entité participante      │
+│                                     │  PK = (FK1, FK2, ..., FKn)      │
+│                                     │                                  │
+└─────────────────────────────────────┴──────────────────────────────────┘
+```
+
+### 4.5. Exemple complet : De MEA à MR
+
+```
+MEA COMPLET - GESTION DE COMMANDES
+
+┌─────────────────┐ 1,1    0,n ┌─────────────────┐
+│   CLIENT        │◄───────────│   COMMANDE      │
+├─────────────────┤ Passe  ├─────────────────┤
+│ • id (PK)       │            │ • id (PK)       │
+│ • nom           │            │ • dateCommande  │
+│ • email         │            │ • dateExpedition│
+│ • adresse       │            └─────────────────┘
+└─────────────────┘                    │
+                                       │ 1,1  0,n
+                           ┌───────────┘
+                           │
+                    Contient
+                           │
+                    ┌──────▼──────┐
+                    │  LIGNE_CMD  │
+                    ├─────────────┤
+                    │ • id (PK)   │
+                    │ • quantité  │
+                    │ • prix      │
+                    └──────▲──────┘
+                           │ 0,n  1,1
+                    ┌──────┴──────┐
+                    │             │
+              Concerne
+                    │
+            ┌──────▼───────┐
+            │   PRODUIT    │
+            ├──────────────┤
+            │ • id (PK)    │
+            │ • nom        │
+            │ • stock      │
+            │ • prixUnit   │
+            └──────────────┘
+
+        ↓ TRADUCTION EN MR
+
+TABLES:
+
+CLIENT(id PK, nom, email, adresse)
+
+COMMANDE(id PK, clientId FK→CLIENT, dateCommande, dateExpedition)
+
+LIGNE_COMMANDE(
+  id PK,
+  commandeId FK→COMMANDE,
+  produitId FK→PRODUIT,
+  quantité,
+  prix
+)
+
+PRODUIT(id PK, nom, stock, prixUnit)
+
+CONTRAINTES:
+- clientId dans COMMANDE : NOT NULL (1,1)
+- commandeId dans LIGNE_COMMANDE : NOT NULL
+- produitId dans LIGNE_COMMANDE : NOT NULL
+```
 
 ---
 
@@ -385,225 +933,220 @@ Très présent dans les annales :
 - "On peut créer une équipe sans participant." V/F ?
 - "Un participant peut ne pas rejoindre d'équipe." V/F ?
 - "Une matière n'existe que si au moins un élève y est inscrit." V/F ?
-- "Une vente peut être effectuée à la fois par un standardiste et un commercial." V/F ?
 
 **Méthode pour répondre :**
-1. Ne se baser que sur le **modèle**, pas sur le bon sens
-2. Regarder les **multiplicités min/max** sur chaque arc
-3. Se rappeler :
-   - `min = 0` : l'objet peut exister sans participer à l'association
-   - `min = 1` : l'objet doit participer au moins une fois
-   - `max = 1` : au plus une participation
-   - `max = n` : plusieurs participations possibles
 
----
+```
+ÉTAPE 1: Repérer les multiplicités min/max dans le modèle
+
+ÉTAPE 2: Se poser les bonnes questions:
+- min = 0 côté entité X ? → X peut exister sans association
+- min = 1 côté entité X ? → X DOIT participer à association
+- max = 1 côté entité X ? → X participe au plus 1 fois
+- max = n côté entité X ? → X peut participer plusieurs fois
+
+ÉTAPE 3: Répondre V ou F basé UNIQUEMENT sur le modèle
+
+EXEMPLE:
+MEA: Élève —(Appartient à)— Promotion
+     1,1                         0,n
+
+Q1: "On peut créer une promotion sans élève." V/F
+A1: V (multiplicité 0,n côté Élève: min=0, donc Promotion peut exister sans Élève)
+
+Q2: "Un élève peut ne pas appartenir à une promotion." V/F
+A2: F (multiplicité 1,1 côté Élève: min=1, donc Élève DOIT appartenir à Promotion)
+
+Q3: "Une promotion peut contenir plusieurs élèves." V/F
+A3: V (multiplicité 0,n côté Promotion: max=n, donc plusieurs Élèves)
+```
 
 ### 5.2. Problèmes typiques à repérer
 
-#### 1) Attribut non atomique
-- **Exemple :** "liste sponsors" dans Équipe
-- **Correction :** créer une entité Sponsor et une association avec Équipe
+```
+CHECKLIST DES PROBLÈMES COURANTS:
 
-#### 2) Identifiant mal choisi
-- Identifiant qui change souvent (ex : email)
-- Identifiant multi-attribut inutilement complexe
-- Absence de clé neutre alors que l'énoncé introduit un numéro interne
+☐ Attribut non atomique
+  - "adresseComplète" au lieu de (rue, CP, ville)
+  - "listeSponsors" (collection)
+  - "coordonnées" au lieu de (latitude, longitude)
+  → Solution: découper ou créer entité
 
-#### 3) Redondance
-- Attribut "total" d'une vente alors qu'on peut le recalculer à partir des lignes de vente
-- Attribut "coordonnées (latitude, longitude)" alors qu'on stocke déjà latitude et longitude séparément
+☐ Redondance
+  - "total" d'une vente recalculable
+  - même info en deux endroits différents
+  → Solution: enlever l'attribut redondant
 
-#### 4) Incohérence avec une contrainte de l'énoncé
-**Exemple :** "Une vente est effectuée par une seule personne : standardiste OU commercial"
-- Si le MEA permet qu'une vente soit reliée à la fois à un standardiste et à un commercial → problème
-- Corriger en modifiant la structure (entité Personne, ou contrainte supplémentaire, etc.)
+☐ Identifiant mal choisi
+  - email (peut changer)
+  - numéro métier instable
+  - multi-attribut inutile (mieux: clé neutre)
+  → Solution: remplacer par clé neutre
 
----
+☐ Référence à autre entité dans attribut
+  - "promotionDeLEleve" dans Élève
+  - "autorDuLivre" dans Livre (si c'est une FK)
+  → Solution: utiliser association
 
-### 5.3. Proposer une correction minimale
+☐ Contrainte métier non modélisée
+  - Ex: "Une vente = standardiste OU commercial (pas les deux)"
+  → Solution: ajuster structure ou ajouter constraint
 
-Quand l'énoncé demande : *"Proposez une modification minimale du modèle pour…"*
-
-✅ **À faire :**
-- Ne pas tout refaire
-- Ajouter juste ce qu'il faut :
-  - une entité
-  - une association
-  - un attribut
-  - un ajustement de multiplicités
-- **Toujours :**
-  - Expliquer ce que tu ajoutes ou modifies
-  - Justifier en quoi cela répond à la demande et évite les redondances
-
----
-
-### 5.4. Traduction en modèle relationnel à partir du MEA
-
-- Reprendre les règles de la [section 4](#4-traduction-mea--modèle-relationnel)
-- Les sujets demandent souvent :
-  - Traduction du modèle tel quel (sans les modifications de la question précédente), OU
-  - En intégrant les modifications
-
-**Entraînement :**
-- Prendre les modèles conceptuels des sujets et :
-  - Répondre aux Vrai/Faux
-  - Identifier attributs non atomiques, redondances
-  - Proposer corrections
-  - Traduire en modèle relationnel
+☐ Association missing ou mal placée
+  - Besoin de représenter relation absente
+  → Solution: ajouter association
+```
 
 ---
 
 ## 6. UML – CE QU'IL FAUT SAVOIR POUR LE PARTIEL
 
-Le cours UML est une introduction. L'examen s'en sert surtout pour les **questions de cours** :
-- Définir UML
-- Citer des types de diagrammes
-- Comparer MEA (Merise) et diagramme de classes UML
-- Quelques éléments de vocabulaire (classe, objet, association, multiplicité, rôle)
+### 6.1. UML vs MEA - Schéma comparatif
 
-### 6.1. Modèle et diagramme
+```
+MERISE (MEA)                           UML (Diagramme de classes)
 
-**Modèle**
-Consensus sur une **abstraction** représentant de façon simplifiée un aspect d'un système réel pour un objectif donné.
+Entité                                 ≈ Classe
+┌──────────────┐                       ┌──────────────┐
+│   ÉLÈVE      │                       │    Élève     │
+├──────────────┤                       ├──────────────┤
+│ • numéro     │                       │ - numéro     │
+│ • nom        │                       │ - nom        │
+│ • prénom     │                       │ - prénom     │
+└──────────────┘                       │              │
+                                       │ + methodes() │
+Identifiant (souligné)                 └──────────────┘
+                                       
+Association                            ≈ Association
+┌──────────┐ 1,1    0,n ┌────────┐    ┌──────────┐ 1    0..* ┌────────┐
+│  Élève   │◄───────────│ Promotion  Élève     |──────── Promotion
+└──────────┘ Appartient└────────┘    └──────────┘        └────────┘
 
-**Diagramme**
-Représentation graphique d'une **structure** ou d'une **séquence d'opérations**.
-Permet de **visualiser** un modèle (ou une partie).
+Multiplicité Merise:                   Multiplicité UML:
+(min, max)                             min..max
+- (0,1) = au plus un                   - 0..1 = au plus un
+- (1,1) = exactement un                - 1 = exactement un
+- (0,n) = zéro à plusieurs             - 0..* = zéro à plusieurs
+- (1,n) = au moins un                  - 1..* = au moins un
 
----
+Instance d'entité                      ≈ Objet
+dupont : Élève                         e1 : Élève
+(nom = "Dupont", ...)                  (numéro = 12345, ...)
+```
 
-### 6.2. UML : définition et rôle
+### 6.2. Types de diagrammes UML (à citer)
 
-**UML : Unified Modeling Language**
-- **Langage de modélisation standardisé** (par l'OMG) depuis 1997
-- Initialement pour le développement logiciel orienté objet
-- Mais utilisable **au-delà de l'informatique**
+```
+DIAGRAMMES UML
+│
+├─ DIAGRAMMES DE STRUCTURE
+│  ├─ Diagramme de CLASSES ✅ (le plus courant pour les données)
+│  ├─ Diagramme d'OBJETS (instances)
+│  ├─ Diagramme de COMPOSANTS
+│  ├─ Diagramme de DÉPLOIEMENT
+│  ├─ Diagramme de PAQUETAGES
+│  └─ ...
+│
+└─ DIAGRAMMES DE COMPORTEMENT
+   ├─ Diagramme d'ACTIVITÉS
+   ├─ Diagramme de CAS D'UTILISATION
+   ├─ Diagramme d'ÉTATS-TRANSITIONS
+   │
+   └─ Diagrammes d'INTERACTION
+      ├─ Diagramme de SÉQUENCE ✅
+      ├─ Diagramme de COMMUNICATION
+      └─ ...
 
-**Points importants :**
-- UML est un **LANGAGE** (syntaxe, sémantique), **pas une méthode complète**
-- Permet de modéliser :
-  - **aspect statique** (structure : diagrammes de classes, objets, composants…)
-  - **aspect fonctionnel** (cas d'utilisation)
-  - **aspect dynamique** (séquences, activités, états-transitions, etc.)
-
----
-
-### 6.3. Diagrammes UML à citer
-
-#### Diagrammes de structure
-- Diagramme de classes
-- Diagramme d'objets
-- Diagrammes de composants
-- Diagrammes de déploiement
-- Diagrammes de paquetages
-- Diagrammes de structures composites
-- Diagrammes de profils
-
-#### Diagrammes de comportement
-- Diagrammes d'activités
-- Diagrammes de cas d'utilisation
-- Diagrammes d'états-transitions
-
-#### Diagrammes d'interaction
-- Diagrammes de séquence
-- Diagrammes de communication
-- Diagrammes de chronométrage
-- Diagrammes d'interaction d'ensemble
-
-**À l'examen :** il suffit souvent de citer **3 types de diagrammes UML** différents.
-
----
-
-### 6.4. Diagramme de classes vs MEA Merise
-
-#### Ressemblances
-- Les deux représentent la **structure des données**
-- **Classes UML** ≈ **entités MEA**
-- **Associations UML** ≈ **associations MEA**
-- **Multiplicités UML** (0..1, 1..1, 0..*, 1..*) ≈ **cardinalités Merise** (0,1 / 1,1 / 0,n / 1,n)
-
-#### Différences
-
-| Aspect | Merise | UML |
-|--------|--------|-----|
-| **Type** | Méthode complète | Langage de modélisation |
-| **Domaine** | Systèmes d'information | Large spectre (logiciel, systèmes, etc.) |
-| **Modèle de données** | Entité–association (MCD) | Diagramme de classes |
-| **Approche** | Données + Traitements (MCD, MLD, MPD) | Multiaspects (structure, comportement, interaction) |
-
----
-
-### 6.5. Vocabulaire UML de base
-
-**Classe**
-- Type abstrait caractérisé par des attributs et des opérations
-- Notation typique : rectangle avec 3 compartiments (nom, attributs, opérations)
-
-**Objet (instance)**
-- Exemple concret de classe
-- Notation : `nomInstance : NomClasse`, avec éventuellement les valeurs des attributs
-
-**Association UML**
-- Lien entre deux classes (ou plus)
-- Multiplicités comme en Merise : 0..1, 1, 0..*, 1..*…
-
-**Rôle**
-- Nom placé à l'extrémité d'une association
-- **Obligatoire** pour les associations réflexives ou multiples entre mêmes classes
+À l'examen: citer 3 types (classe, séquence, cas d'utilisation suffisent)
+```
 
 ---
 
 ## 7. VOCABULAIRE, ACRONYMES ET QUESTIONS DE COURS CLASSIQUES
 
-### 7.1. Correspondance de vocabulaire (fréquent)
+### 7.1. Correspondance de vocabulaire
 
-Dans les sujets, on trouve souvent des **appariements** :
-
-| Concept model. relationnel | Concept MEA |
-|---------------------------|------------|
-| Relation | **Entité** ou Association |
-| Lien | **Association** |
-| Propriété | **Attribut** |
-| Instance | **Occurrence** |
-| Spécialisation | **Héritage** |
-
-**Exemple d'appariement :**
 ```
-(A) Relation        ↔  (c) Table
-(B) Lien            ↔  (a) Association
-(C) Propriété       ↔  (b) Attribut
-(D) Instance        ↔  (d) Occurrence
+Modèle relationnel           MEA
+────────────────────       ──────
+Relation                   Entité
+Table                      (même entité)
+Lien                       Association
+Propriété / Colonne        Attribut
+Instance / Tuple           Occurrence
+Clé primaire               Identifiant
+Clé étrangère              (résultat d'association)
+Spécialisation / Héritage  Héritage (généralisation)
 ```
-
----
 
 ### 7.2. Acronymes à connaître
 
-**SGBDR**
-- **Système de Gestion de Bases de Données Relationnelles**
+```
+SGBDR
+System de Gestion de Bases de Données Relationnelles
+= logiciel qui gère les BD (MySQL, PostgreSQL, Oracle...)
 
-**CRUD**
-- **Create, Read, Update, Delete**
-- Opérations de base sur les données
+CRUD
+Create, Read, Update, Delete
+= 4 opérations de base sur les données
 
-**UML**
-- **Unified Modeling Language**
+UML
+Unified Modeling Language
+= langage de modélisation standardisé
 
----
+MCD
+Modèle Conceptuel de Données = MEA
+
+MLD
+Modèle Logique de Données = Modèle relationnel
+
+MPD
+Modèle Physique de Données = SQL implémenté
+
+PK
+Primary Key = Clé primaire
+
+FK
+Foreign Key = Clé étrangère
+
+SI
+Système d'Information
+```
 
 ### 7.3. Questions types de cours
 
-**Exemples de questions récurrentes :**
-1. Donner la définition de **"système d'information"**
-2. Donner la différence entre **donnée et information**
-3. Rappeler la **hiérarchie d'abstraction** (conceptuel/logique/physique) et le modèle associé à chaque niveau
-4. Définir **SGBDR, CRUD, UML**
-5. Expliquer ce qu'est une **association réflexive** dans le MEA
-6. Expliquer ce qu'est l'**identifiant implicite** d'une association binaire
-7. Donner une **différence** entre modèle entité–association Merise et diagramme de classes UML
-8. Citer **trois types de diagrammes UML**
-9. Rappeler les **6 composants d'un système d'information**
-10. Parmi les 6 composants du SI, lesquels forment le **système informatique** ?
+```
+Q1: Définir "système d'information"
+A1: Ensemble structuré d'informations, acteurs et processus
+    permettant de collecter, stocker et mettre à disposition l'info.
+
+Q2: Différence donnée / information
+A2: Donnée = valeur brute (18)
+    Information = donnée interprétée (18°C dans salle IG2I)
+
+Q3: Hiérarchie d'abstraction + noms des modèles
+A3: Conceptuel (MCD/MEA) → Logique (MLD/MR) → Physique (MPD/SQL)
+
+Q4: Association réflexive
+A4: Lien entre une entité et elle-même, avec rôles obligatoires
+    Ex: Élève mentor de Élève (mentor / mentoré)
+
+Q5: Identifiant implicite d'une association binaire
+A5: = combinaison de l'identifiant des deux entités participantes
+
+Q6: Différence Merise vs UML
+A6: Merise = méthode complète (MCD/MLD/MPD, traitements)
+    UML = langage de modélisation standardisé (diagrammes multiples)
+
+Q7: Citer 3 diagrammes UML
+A7: - Diagramme de classes
+    - Diagramme de séquence
+    - Diagramme de cas d'utilisation
+
+Q8: Composants du SI
+A8: Acteurs, Processus, Informations, Données, BDD, Matériels, Applications
+    Système informatique = Matériels + BDD + Applications
+```
 
 ---
 
@@ -612,114 +1155,179 @@ Dans les sujets, on trouve souvent des **appariements** :
 ### 8.1. Ce qui tombe presque à tous les coups
 
 #### 1) Gros exercice de modélisation (10–12 points)
-**Énoncé long** (drones, vols, salles, NextCloud…)
 
-À faire :
+**Énoncés types :**
+- Plateforme de partage de fichiers (NextCloud)
+- Courses de drones
+- Réservation de vols par agence de voyages
+- Gestion des salles et du matériel
+- Système de location de films
+
+**À faire :**
 - ✅ Modèle entité–association **complet**
-- ✅ **Identifiants, attributs, multiplicités**
-- ✅ **Choix de conception** expliqués
+- ✅ **Identifiants, attributs, multiplicités clairs**
+- ✅ **Justifier chaque choix de conception**
 - ✅ **Parfois :** diagramme d'instances
 
-#### 2) Exercice de compréhension / modification d'un MEA (5–8 points)
-- Vrai/Faux d'interprétation
-- Corrections : attributs non atomiques, redondances, identifiants, cardinalités
-- Traduction du MEA en modèle relationnel
-- **Parfois bonus :** requêtes SQL simples
+#### 2) Exercice de compréhension / modification (5–8 points)
+
+- Vrai/Faux d'interprétation du MEA
+- Corrections : attributs non atomiques, redondances
+- Traduction en modèle relationnel
+- **Bonus :** petites requêtes SQL
 
 #### 3) Questions de cours (3–4 points)
+
 - Définitions : SI, donnée vs information
-- Hiérarchie d'abstraction (MCD/MLD/MPD)
+- Hiérarchie d'abstraction
 - Acronymes SGBDR/CRUD/UML
-- Vocabulaire (relation/lien/propriété/instance/spécialisation)
+- Vocabulaire et correspondances
 - Différence Merise/UML
-- Exemples de diagrammes UML
+
+### 8.2. Calendrier de révision (4 semaines)
+
+```
+SEMAINE 1 – FONDAMENTAUX
+┌─────────────────────────────────────────┐
+│ Jour 1-2: Lire les diapos CSI-01/02    │
+│ Jour 3-4: Refaire 2 MEA à partir zéro │
+│           (énoncé + MEA + schémas)     │
+│ Jour 5-6: Questions de cours (définit) │
+│ Jour 7: Bilan + ajuster zones faibles  │
+└─────────────────────────────────────────┘
+
+SEMAINE 2 – TRADUCTION & CAS D'ÉTUDE
+┌─────────────────────────────────────────┐
+│ Jour 1-2: Relire CSI-03 (traduction)   │
+│ Jour 3-4: Traduire 2 MEA en MR complet│
+│           (avec les 4 cas: 1,n / 1,1...) │
+│ Jour 5-6: Exercices Vrai/Faux (sujets) │
+│ Jour 7: Corrections + ajustements      │
+└─────────────────────────────────────────┘
+
+SEMAINE 3 – CRITIQUE & UML
+┌─────────────────────────────────────────┐
+│ Jour 1-2: Identifier problèmes MEA     │
+│           (attributs, redondance...)    │
+│ Jour 3-4: Proposer corrections min.    │
+│ Jour 5-6: Vocabulaire + UML (CSI-04)   │
+│ Jour 7: Mock test 1h30 (complet)       │
+└─────────────────────────────────────────┘
+
+SEMAINE 4 – ENTRAÎNEMENT INTENSIF
+┌─────────────────────────────────────────┐
+│ Jour 1-2: Sujet complet 2024-2025      │
+│           (conditions examen: 3h30)     │
+│ Jour 3-4: Sujet complet 2022-2023      │
+│ Jour 5-6: Sujet complet 2021-2022      │
+│ Jour 7: Révision fiche + repos         │
+└─────────────────────────────────────────┘
+```
+
+### 8.3. Checklist avant le partiel
+
+```
+JE SAIS:
+☐ Définir système d'information
+☐ Expliquer hiérarchie d'abstraction (MCD → MLD → MPD)
+☐ Construire un MEA à partir d'un énoncé
+☐ Identifier attributs non atomiques et les corriger
+☐ Détecter redondances et les justifier
+☐ Lire multiplicités dans les 2 sens
+☐ Repérer associations réflexives et n-aires
+☐ Traduire MEA en MR (tous les cas)
+☐ Interpréter un modèle (Vrai/Faux)
+☐ Proposer corrections minimales
+☐ Citer 3+ diagrammes UML
+☐ Donner différence Merise/UML
+☐ Définir SGBDR, CRUD, UML
+☐ Distinguer donnée vs information
+```
+
+### 8.4. Conseils pratiques le jour du partiel
+
+```
+AVANT (30 min avant start)
+├─ Bien dormir la veille
+├─ Petit-déjeuner normal
+├─ Apporter stylos + crayons
+├─ Laisser téléphone dehors
+└─ Mindset: "Je vais faire de mon mieux"
+
+PENDANT (examen)
+├─ Lire ENTIÈREMENT l'énoncé (5 min)
+├─ Commencer par ce que tu maîtrises
+├─ Pour MEA:
+│  ├─ Identifier entités (groupes nominaux)
+│  ├─ Identifier associations (groupes verbaux)
+│  ├─ Placer multiplicités (2 sens obligatoire)
+│  ├─ Vérifier: pas de FK en attribut, pas de listes
+│  └─ Justifier choix de conception
+├─ Pour traduction MR:
+│  ├─ Rappel des 4 cas
+│  ├─ Placer FKs du côté (n)
+│  ├─ Créer tables d'assoc. si (n,n)
+│  └─ Bien former clés primaires
+├─ Pour questions cours:
+│  ├─ Définitions précises (1-2 phrases)
+│  └─ Pas besoin de développer trop
+└─ Vérifier: présentation lisible, pas d'erreur évidente
+
+APRÈS
+└─ Pas de stress, tu as donné ton max!
+```
 
 ---
 
-### 8.2. Plan de travail conseillé (4 jours/semaines)
+## RÉSUMÉ ULTRA-RAPIDE
 
-#### **Jour/Semaine 1 – MEA (conception)**
+```
+🎯 OBJECTIF FINAL
 
-Refaire au moins **deux gros énoncés** de modélisation :
-- Courses de drones
-- Vols d'avion
-- Salles de Centrale Lille
-- NextCloud (plateforme de partage de fichiers)
+Savoir faire en 3h30:
+1. Lire un énoncé complexe (5 min)
+2. Construire un MEA correct (60 min)
+3. Critiquer un modèle fourni (30 min)
+4. Traduire en modèle relationnel (45 min)
+5. Répondre à questions cours (30 min)
 
-Pour chacun :
-- Listes des entités et attributs
-- Identifiants
-- Associations + multiplicités
-- Explications des choix de conception
+PIÈGES À ÉVITER:
+❌ Référence à entité dans attribut
+❌ Listes/collections en attribut
+❌ Oublier attributs d'association
+❌ Mal placer les FKs (doivent côté n)
+❌ Oublier table d'assoc. pour (n,n)
+❌ Multiplicités pas lues 2 sens
+❌ Redondances évidentes pas éliminées
 
-#### **Jour/Semaine 2 – Traduction et critique**
-
-- Prendre un MEA que tu as construit :
-  - Le traduire en **modèle relationnel** (avec PK/FK et tables d'association)
-  - Vérifier la cohérence des cardinalités
-- Refaires les exercices de compréhension de modèles :
-  - Vrai/Faux
-  - Détection d'attributs non atomiques
-  - Redondances
-  - Modifications minimales
-
-#### **Jour/Semaine 3 – UML et vocabulaire**
-
-Apprendre par cœur :
-- Définition de SI
-- Hiérarchie d'abstraction (MCD → MLD → MPD)
-- Différence donnée/information
-- Acronymes SGBDR/CRUD/UML
-- Vocabulaires relation/lien/propriété/instance/spécialisation
-- 3 types de diagrammes UML
-- Différence **Merise vs UML**
-
-#### **Jour/Semaine 4 – Entraînement complet sur sujets complets**
-
-- Reprendre un sujet complet d'examen (2021–2025)
-- Traiter tous les exercices dans l'ordre
-- Chrono-tiser : 3-4 heures pour te rapprocher des conditions réelles
+FORCE-TOI À:
+✅ Justifier CHAQUE choix
+✅ Lire multiplicités 2 fois
+✅ Vérifier atomicité attributs
+✅ Tracer un diagramme d'instances (mental)
+✅ Traduire cas par cas (1,n puis n,n)
+✅ Répondre Vrai/Faux avec logique pure
+```
 
 ---
 
-### 8.3. Conseils supplémentaires
+## Ressources et contacts
 
-**Avant le partiel :**
-1. Bien dormir la veille
-2. Apporter stylos + crayons (le modèle se fait à la main, sauf demande explicite)
-3. Relire rapidement la fiche la veille
+**Sujets d'entraînement recommandés:**
+- 2024–2025 : Plateforme NextCloud (partage fichiers)
+- 2023–2024 : Compétition sportive
+- 2022–2023 : Courses de drones
+- 2021–2022 : Gestion salles + Rétro-Vidéo + Cluster calcul
+- 2022 (réparation) : Vols d'avion + Enseignants/Élèves
 
-**Pendant le partiel :**
-1. Lire **entièrement** les énoncés avant de commencer
-2. Commencer par ce qui te semble le plus facile
-3. Bien justifier tes choix de conception
-4. Vérifier tes multiplicités en les lisant dans les deux sens
-
-**Bon courage! 🎓**
+**Diapos officielles à relire:**
+- CSI-01 : Présentation + SI
+- CSI-02 : MEA en détail
+- CSI-03 : Traduction MR
+- CSI-04 : UML intro
 
 ---
 
-## Ressources annexes
+**BON COURAGE POUR TON PARTIEL ! 🎓**
 
-### Checklist avant le partiel
-
-- [ ] Je sais définir un système d'information
-- [ ] Je sais expliquer la hiérarchie d'abstraction (MCD/MLD/MPD)
-- [ ] Je peux construire un MEA à partir d'un énoncé
-- [ ] Je repère les attributs non atomiques
-- [ ] Je détecte les redondances
-- [ ] Je sais traduire un MEA en modèle relationnel
-- [ ] Je connais les multiplicités et cardinalités
-- [ ] Je sais lire une association réflexive
-- [ ] Je peux interpréter un modèle (Vrai/Faux)
-- [ ] Je connais au moins 3 types de diagrammes UML
-- [ ] Je peux donner une différence Merise/UML
-- [ ] Je connais les acronymes SGBDR/CRUD/UML
-
-### Sujets d'entraînement
-
-- **2024–2025 :** Plateforme de partage de fichiers (NextCloud)
-- **2023–2024 :** Compétition (diagramme à analyser + modif)
-- **2022–2023 :** Courses de drones
-- **2021–2022 :** Gestion des salles + Rétro-Vidéo + Cluster de calcul
-- **Réparation 2022 :** Réservation de vols + Enseignants/Élèves
+_Fait avec ❤️ et basé sur les vrais sujets CSI (LE2) 2021–2025_
