@@ -828,6 +828,4 @@ DONNÉE BRUTE  +  CONTEXTE  =  INFORMATION
 
 ---
 
-**BON COURAGE POUR TON PARTIEL ! 🎓**
 
-_Fait avec ❤️ à partir de tous les examens CSI 2021–2025_
